@@ -1,0 +1,17 @@
+{
+  "name": "Jude’s Craft Deals",
+  "short_name": "Craft Deals",
+  "description": "Verified crochet, beading, yarn, tool, and craft-machine deals near Edmond and online.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf6ed",
+  "theme_color": "#7d1717",
+  "icons": [
+    {
+      "src": "/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
