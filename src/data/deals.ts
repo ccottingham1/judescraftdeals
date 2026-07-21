@@ -1,6 +1,12 @@
 // All deal data, store info, and image references for Jude's Craft Deals.
 // The refresh automation edits this file; UI code lives in src/App.tsx.
 
+// Written by the refresh automation after every successful audit — the ONLY
+// place the displayed freshness date lives. Never a promise about the next run.
+export const meta = {
+  lastChecked: "July 20, 2026 at 11:30 PM Central",
+};
+
 export type Craft = "Crochet" | "Beading";
 export type Store = "Walmart" | "Michaels" | "Hobby Lobby" | "Hobbii";
 export type LocalStore = Exclude<Store,"Hobbii">;
@@ -125,12 +131,6 @@ export const deals: Deal[] = rawDeals.filter(d => {
   seenUrls.add(d.url);
   return true;
 });
-
-// Written by the refresh automation after every successful audit.
-// Display this — never a promise about the next run.
-export const meta = {
-  lastChecked: "July 20, 2026 at 11:30 PM Central",
-};
 
 export const stores: Record<LocalStore,{name:string,address:string,maps:string}> = {
   Walmart:{name:"Walmart Supercenter #389",address:"1225 W I-35 Frontage, Edmond, OK 73034",maps:"https://www.google.com/maps/dir/?api=1&destination=1225+W+I-35+Frontage+Edmond+OK+73034"},
