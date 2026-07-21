@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { deals, stores, storeLogos, type Deal, type Store } from "./data/deals";
+import { deals, meta, stores, storeLogos, type Deal, type Store } from "./data/deals";
 
 const money=(n:number)=>`$${n.toFixed(2)}`;
 // If a self-hosted product image is missing, fall back to the original retailer URL.
@@ -13,7 +13,7 @@ function StoreBadge({store}:{store:Store}){
   </span>
 }
 
-function Card({deal,large,onOpen}:{deal:Deal;large?:boolean;onOpen:(d:Deal)=>void}) {
+function Card({deal,large,saved,onToggleSave,onOpen}:{deal:Deal;large?:boolean;saved:boolean;onToggleSave:(d:Deal)=>void;onOpen:(d:Deal)=>void}) {
   const pct=Math.round((1-deal.sale/deal.regular)*100);
   return <article className={`deal-card ${large?"large":""}`} onClick={()=>onOpen(deal)}>
     <div className="deal-photo">
@@ -21,9 +21,10 @@ function Card({deal,large,onOpen}:{deal:Deal;large?:boolean;onOpen:(d:Deal)=>voi
       <span className="discount">{pct}% off</span>
       <span className="craft-tag">{deal.kind}</span>
       {deal.fresh&&<span className="new-flag">New today</span>}
+      <button className={`save-heart ${saved?"saved":""}`} aria-pressed={saved} aria-label={saved?"Remove from wishlist":"Save to wishlist"} onClick={e=>{e.stopPropagation();onToggleSave(deal);}}>{saved?"♥":"♡"}</button>
     </div>
     <div className="deal-info">
-      <div className="store-line"><StoreBadge store={deal.store}/><span>Online</span></div>
+      <div className="store-line"><StoreBadge store={deal.store}/><span>{deal.availability??"Online"}</span></div>
       <h3>{deal.title}</h3><p>{deal.detail}</p>
       <div className="price"><strong>{money(deal.sale)}</strong><s>{money(deal.regular)}</s><em>Save {money(deal.regular-deal.sale)}</em></div>
       <span className="promo">Verified {deal.verified}</span>
@@ -44,13 +45,25 @@ export default function Home(){
   const [craft,setCraft]=useState("All");
   const [kind,setKind]=useState("All supplies");
   const [store,setStore]=useState("All stores");
+  const [avail,setAvail]=useState("All availability");
   const [selected,setSelected]=useState<Deal|null>(null);
+  const [wishlist,setWishlist]=useState<string[]>(()=>{try{return JSON.parse(localStorage.getItem("jcd-wishlist")||"[]")}catch{return []}});
+  const [wishOnly,setWishOnly]=useState(false);
+  const toggleSave=(d:Deal)=>setWishlist(w=>{
+    const next=w.includes(d.url)?w.filter(u=>u!==d.url):[...w,d.url];
+    try{localStorage.setItem("jcd-wishlist",JSON.stringify(next))}catch{/* private mode */}
+    return next;
+  });
+  // Rank genuine limited-time discounts above everyday/perpetual "sale" prices.
+  const genuine=(d:Deal)=>d.saleType==="everyday"?0:1;
   const featured=deals.filter(d=>(1-d.sale/d.regular)>=.33)
-    .sort((a,b)=>(1-b.sale/b.regular)-(1-a.sale/a.regular)).slice(0,9);
+    .sort((a,b)=>genuine(b)-genuine(a)||(1-b.sale/b.regular)-(1-a.sale/a.regular)).slice(0,9);
   const feed=useMemo(()=>deals.filter(d=>
     (craft==="All"||d.craft===craft)&&(kind==="All supplies"||d.kind===kind)&&(store==="All stores"||d.store===store)&&
+    (avail==="All availability"||(d.availability??"Online")===avail)&&
+    (!wishOnly||wishlist.includes(d.url))&&
     `${d.title} ${d.store} ${d.kind} ${d.detail}`.toLowerCase().includes(query.toLowerCase())
-  ).sort((a,b)=>b.id-a.id),[craft,kind,store,query]);
+  ).sort((a,b)=>b.id-a.id),[craft,kind,store,avail,query,wishOnly,wishlist]);
 
   return <main>
     <header>
@@ -61,7 +74,7 @@ export default function Home(){
 
     <section className="hero" id="top">
       <div className="hero-copy">
-        <p className="eyebrow">EDMOND + ONLINE · REFRESHED JULY 20, 2026 AT 10:00 PM CENTRAL</p>
+        <p className="eyebrow">EDMOND + ONLINE · LAST CHECKED {meta.lastChecked.toUpperCase()}</p>
         <h1>Craft supplies.<br/><em>Better prices.</em></h1>
         <p>Individually checked crochet and beading offers with exact product listings and photos.</p>
         <a href="#featured">Browse the deals <span>↓</span></a>
@@ -76,20 +89,22 @@ export default function Home(){
 
     <section className="featured" id="featured">
       <div className="section-title"><div><p>33% OFF OR BETTER</p><h2>Worth checking first</h2></div><span>Only the strongest verified discounts</span></div>
-      <div className="featured-grid">{featured.map((d,i)=><Card key={d.id} deal={d} large={i===0} onOpen={setSelected}/>)}</div>
+      <div className="featured-grid">{featured.map((d,i)=><Card key={d.id} deal={d} large={i===0} saved={wishlist.includes(d.url)} onToggleSave={toggleSave} onOpen={setSelected}/>)}</div>
     </section>
 
     <section className="all-deals" id="all">
-      <div className="section-title"><div><p>VERIFIED DEAL FEED</p><h2>Search everything</h2></div><span>Newest verified additions first · next audit tomorrow at 5 AM</span></div>
+      <div className="section-title"><div><p>VERIFIED DEAL FEED</p><h2>Search everything</h2></div><span>Newest verified additions first · last checked {meta.lastChecked}</span></div>
       <div className="deal-tools">
         <label className="search-box"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search yarn, seed beads, tools, store…"/></label>
         <select value={craft} onChange={e=>setCraft(e.target.value)} aria-label="Filter by craft"><option>All</option><option>Crochet</option><option>Beading</option></select>
         <select value={kind} onChange={e=>setKind(e.target.value)} aria-label="Filter by supply type"><option>All supplies</option><option>Yarn</option><option>Crochet tools</option><option>Single-color beads</option><option>Bead assortments</option><option>Stringing</option><option>Beading tools</option><option>Craft machines</option></select>
         <select value={store} onChange={e=>setStore(e.target.value)} aria-label="Filter by store"><option>All stores</option><option>Walmart</option><option>Michaels</option><option>Hobby Lobby</option><option>Hobbii</option></select>
+        <select value={avail} onChange={e=>setAvail(e.target.value)} aria-label="Filter by availability"><option>All availability</option><option>Online</option><option>In-store nearby</option></select>
+        <button className={`wishlist-toggle ${wishOnly?"active":""}`} aria-pressed={wishOnly} onClick={()=>setWishOnly(w=>!w)}>♥ Saved{wishlist.length?` (${wishlist.length})`:""}</button>
         <b>{feed.length} results</b>
       </div>
-      <div className="dense-grid">{feed.map(d=><Card key={d.id} deal={d} onOpen={setSelected}/>)}</div>
-      {!feed.length&&<div className="empty">No deals match that search. Try a product type or store name.</div>}
+      <div className="dense-grid">{feed.map(d=><Card key={d.id} deal={d} saved={wishlist.includes(d.url)} onToggleSave={toggleSave} onOpen={setSelected}/>)}</div>
+      {!feed.length&&<div className="empty">{wishOnly?"No saved deals yet. Tap the ♡ on any deal card to save it for Jude's wishlist.":"No deals match that search. Try a product type or store name."}</div>}
     </section>
 
     <section className="garage-sales" id="garage-sales">
@@ -115,6 +130,9 @@ export default function Home(){
         <div className="modal-copy">
           <div className="modal-meta"><StoreBadge store={selected.store}/><span>{selected.craft}</span></div><h2>{selected.title}</h2>
           <div className="modal-price"><strong>{money(selected.sale)}</strong><s>{money(selected.regular)}</s></div>
+          {selected.saleType&&<p className={`price-note ${selected.saleType}`}>{selected.saleType==="everyday"
+            ?"Everyday sale price — this store runs this discount most of the time, so no rush."
+            :"Genuine limited-time or clearance discount — likely gone once stock sells out."}</p>}
           <p className="description">{selected.detail}. Price, comparison price, photo and listing checked {selected.verified}.</p>
           {selected.store==="Hobbii"?
             <div className="location"><span>ONLINE ONLY</span><b>Ships from Hobbii</b><p>{selected.shipping}. The card price does not include tax or shipping.</p></div>:
