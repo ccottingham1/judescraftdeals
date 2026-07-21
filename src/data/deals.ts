@@ -61,7 +61,7 @@ export const photos = {
   saffronYarn:"https://i5.walmartimages.com/seo/Red-Heart-Super-Saver-4-Medium-Acrylic-Yarn-Saffron-7oz-198g-364-Yards_93eaf2a0-6b3e-45be-a9e3-29f81e0cd708.043122b88f923bdd03ada472fdb912b3.jpeg?odnBg=FFFFFF&odnHeight=573&odnWidth=573",
 };
 
-export const deals: Deal[] = [
+const rawDeals: Deal[] = [
   {id:1,title:"Clear Glass Seed Beads, 6/0 by Bead Landing",store:"Michaels",craft:"Beading",kind:"Single-color beads",regular:5.99,sale:2.99,image:"products/1.avif",sourceImage:photos.clearBeads,url:"https://www.michaels.com/product/clear-glass-seed-beads-60-by-bead-landing-10594049",detail:"Clear AB-finish glass beads · size 6/0 · 112-inch strand",verified:"July 18, 2026"},
   {id:2,title:"Light Gold Glass Seed Beads, 6/0 by Bead Landing",store:"Michaels",craft:"Beading",kind:"Single-color beads",regular:5.99,sale:4.49,image:"products/2.avif",sourceImage:photos.goldBeads,url:"https://www.michaels.com/product/light-gold-glass-seed-beads-60-by-bead-landing-10594047",detail:"Light-gold glass beads · size 6/0 · 100-inch strand",verified:"July 18, 2026"},
   {id:3,title:"Beadalon Nylon Jaw Flat Nose Pliers",store:"Michaels",craft:"Beading",kind:"Beading tools",regular:14.99,sale:5,image:"products/3.avif",sourceImage:photos.pliers,url:"https://www.michaels.com/product/beadalon-nylon-jaw-flat-nose-pliers-10157928",detail:"5.75-inch stainless-steel pliers with non-marring nylon jaws",verified:"July 18, 2026"},
@@ -109,6 +109,23 @@ export const deals: Deal[] = [
   {id:45,title:"Jewelry Making & Repair Tool Kit",store:"Michaels",craft:"Beading",kind:"Beading tools",regular:48.98,sale:36.73,image:"products/45.jpg",sourceImage:photos.jewelryToolKit,url:"https://www.michaels.com/product/jewelry-making-supplies-kit-jewelry-repair-tool-with-accessories-jewelry-pliers-jewelry-findings-and-beading-wires-for-adults-and-beginners-266309178333577224",detail:"Pliers, tweezers, caliper, cord, wire, elastic and organized jewelry findings",verified:"July 20, 2026",fresh:true},
   {id:46,title:"Red Heart Super Saver Yarn · Saffron",store:"Walmart",craft:"Crochet",kind:"Yarn",regular:4.99,sale:3.77,image:"products/46.avif",sourceImage:photos.saffronYarn,url:"https://www.walmart.com/ip/Red-Heart-Super-Saver-Medium-Acrylic-Saffron-Yarn-364-yd/844231803",detail:"7 oz · 364 yd · medium acrylic yarn · sold and shipped by Walmart",verified:"July 20, 2026",fresh:true},
 ];
+
+// Guard: the site never shows the same product URL twice, even if a refresh
+// accidentally inserts a duplicate. scripts/validate-deals.mjs fails the build
+// on duplicates so they get fixed at the source; this keeps the UI correct
+// regardless. First occurrence (lowest id) wins.
+const seenUrls = new Set<string>();
+export const deals: Deal[] = rawDeals.filter(d => {
+  if (seenUrls.has(d.url)) return false;
+  seenUrls.add(d.url);
+  return true;
+});
+
+// Written by the refresh automation after every successful audit.
+// Display this — never a promise about the next run.
+export const meta = {
+  lastChecked: "July 20, 2026 at 10:00 PM Central",
+};
 
 export const stores: Record<LocalStore,{name:string,address:string,maps:string}> = {
   Walmart:{name:"Walmart Supercenter #389",address:"1225 W I-35 Frontage, Edmond, OK 73034",maps:"https://www.google.com/maps/dir/?api=1&destination=1225+W+I-35+Frontage+Edmond+OK+73034"},

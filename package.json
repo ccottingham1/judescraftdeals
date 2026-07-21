@@ -8,7 +8,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/validate-deals.mjs && tsc -b && vite build",
+    "validate-deals": "node scripts/validate-deals.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
