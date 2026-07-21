@@ -13,7 +13,19 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Jude’s Craft Deals" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="theme-color" content="#7d1717" />
+    <meta name="theme-color" content="#fbf6ed" />
+    <script>
+      // Apply the saved theme before first paint so there is no flash.
+      (function () {
+        try {
+          var t = JSON.parse(localStorage.getItem("jcd-theme") || "{}");
+          var m = t.mode || "light";
+          if (m === "system") m = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          document.documentElement.dataset.mode = m;
+          document.documentElement.dataset.accent = t.accent || "classic";
+        } catch (e) { /* first visit / blocked storage: defaults apply */ }
+      })();
+    </script>
     <meta property="og:title" content="Jude’s Craft Deals" />
     <meta property="og:description" content="Yarn, beads &amp; better prices near Edmond and online." />
     <meta property="og:url" content="https://ccottingham1.github.io/judescraftdeals/" />

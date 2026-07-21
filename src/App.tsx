@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { deals, garageSales, meta, stores, storeLogos, type Deal, type Store } from "./data/deals";
 
 const money=(n:number)=>`$${n.toFixed(2)}`;
@@ -34,6 +34,77 @@ function Card({deal,large,saved,onToggleSave,onOpen}:{deal:Deal;large?:boolean;s
       <button>Deal details <span>→</span></button>
     </div>
   </article>
+}
+
+// --- theme picker -----------------------------------------------------
+// Persisted in localStorage as {mode, accent}; index.html applies the saved
+// theme before first paint so there is no flash. "system" follows the device.
+type ThemeMode="light"|"dark"|"night"|"system";
+type ThemeChoice={mode:ThemeMode;accent:string};
+const MODES:[ThemeMode,string][]=[["light","Light"],["dark","Dark"],["night","Night"],["system","Auto"]];
+const ACCENTS=[
+  {id:"classic",name:"Classic red",swatch:"#7d1717"},
+  {id:"pink",name:"Soft pink",swatch:"#a13458"},
+  {id:"teal",name:"Juniper teal",swatch:"#155e60"},
+  {id:"lavender",name:"Lavender",swatch:"#5d4198"},
+  {id:"honey",name:"Warm honey",swatch:"#84540f"},
+];
+function loadTheme():ThemeChoice{
+  try{
+    const t=JSON.parse(localStorage.getItem("jcd-theme")||"{}");
+    return{
+      mode:MODES.some(([m])=>m===t.mode)?t.mode:"light",
+      accent:ACCENTS.some(a=>a.id===t.accent)?t.accent:"classic",
+    };
+  }catch{return{mode:"light",accent:"classic"}}
+}
+function applyTheme(t:ThemeChoice){
+  const el=document.documentElement;
+  el.dataset.mode=t.mode==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):t.mode;
+  el.dataset.accent=t.accent;
+  // keep the iPhone status bar / browser chrome matching the page background
+  const metaTag=document.querySelector('meta[name="theme-color"]');
+  if(metaTag)metaTag.setAttribute("content",getComputedStyle(el).getPropertyValue("--paper").trim()||"#fbf6ed");
+}
+function ThemePicker(){
+  const [open,setOpen]=useState(false);
+  const [theme,setTheme]=useState<ThemeChoice>(loadTheme);
+  const ref=useRef<HTMLDivElement>(null);
+  useEffect(()=>{
+    applyTheme(theme);
+    try{localStorage.setItem("jcd-theme",JSON.stringify(theme))}catch{/* private mode */}
+    if(theme.mode!=="system")return;
+    const mq=matchMedia("(prefers-color-scheme: dark)");
+    const onChange=()=>applyTheme(theme);
+    mq.addEventListener("change",onChange);
+    return()=>mq.removeEventListener("change",onChange);
+  },[theme]);
+  useEffect(()=>{
+    if(!open)return;
+    const onDown=(e:PointerEvent)=>{if(ref.current&&!ref.current.contains(e.target as Node))setOpen(false)};
+    const onKey=(e:KeyboardEvent)=>{if(e.key==="Escape")setOpen(false)};
+    document.addEventListener("pointerdown",onDown);
+    document.addEventListener("keydown",onKey);
+    return()=>{document.removeEventListener("pointerdown",onDown);document.removeEventListener("keydown",onKey)};
+  },[open]);
+  return <div className="theme-picker" ref={ref}>
+    <button className="theme-btn" aria-label="Theme and appearance" aria-expanded={open} onClick={()=>setOpen(o=>!o)}>
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 22a10 10 0 1 1 10-10c0 2.2-1.8 3-3 3h-2.6a2.4 2.4 0 0 0-1.8 4c.6.7.2 3-2.6 3Z"/>
+        <circle cx="7.5" cy="11.5" r=".8"/><circle cx="11" cy="7.5" r=".8"/><circle cx="16" cy="9.5" r=".8"/>
+      </svg>
+    </button>
+    {open&&<div className="theme-panel" role="group" aria-label="Theme options">
+      <p>Appearance</p>
+      <div className="theme-modes">{MODES.map(([id,label])=>
+        <button key={id} className={theme.mode===id?"active":""} aria-pressed={theme.mode===id} onClick={()=>setTheme(t=>({...t,mode:id}))}>{label}</button>)}
+      </div>
+      <p>Color</p>
+      <div className="theme-accents">{ACCENTS.map(a=>
+        <button key={a.id} title={a.name} aria-label={a.name} aria-pressed={theme.accent===a.id} className={theme.accent===a.id?"active":""} style={{background:a.swatch}} onClick={()=>setTheme(t=>({...t,accent:a.id}))}/>)}
+      </div>
+    </div>}
+  </div>;
 }
 
 function Chicken(){
@@ -72,7 +143,10 @@ export default function Home(){
     <header>
       <a className="brand" href="#top"><span>J</span><b>Jude’s Craft Deals</b></a>
       <nav><a href="#featured">Top deals</a><a href="#all">All deals</a><a href="#garage-sales">Garage sales</a><a href="#stores">Stores</a></nav>
-      <a className="header-search" href="#all">Search deals ⌕</a>
+      <div className="header-right">
+        <a className="header-search" href="#all">Search deals ⌕</a>
+        <ThemePicker/>
+      </div>
     </header>
 
     <section className="hero" id="top">
