@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
-import { deals, photos, stores, storeLogos, type Deal, type Store } from "./data/deals";
+import { deals, stores, storeLogos, type Deal, type Store } from "./data/deals";
 
 const money=(n:number)=>`$${n.toFixed(2)}`;
+// If a self-hosted product image is missing, fall back to the original retailer URL.
+const useSourceOnError=(d:Deal)=>(e:React.SyntheticEvent<HTMLImageElement>)=>{
+  if(d.sourceImage&&e.currentTarget.src!==d.sourceImage)e.currentTarget.src=d.sourceImage;
+};
 
 function StoreBadge({store}:{store:Store}){
   return <span className={`store-badge store-${store.toLowerCase().replaceAll(" ","-")}`}>
@@ -13,7 +17,7 @@ function Card({deal,large,onOpen}:{deal:Deal;large?:boolean;onOpen:(d:Deal)=>voi
   const pct=Math.round((1-deal.sale/deal.regular)*100);
   return <article className={`deal-card ${large?"large":""}`} onClick={()=>onOpen(deal)}>
     <div className="deal-photo">
-      <img src={deal.image} alt={deal.title} loading={large?"eager":"lazy"}/>
+      <img src={deal.image} alt={deal.title} loading={large?"eager":"lazy"} onError={useSourceOnError(deal)}/>
       <span className="discount">{pct}% off</span>
       <span className="craft-tag">{deal.kind}</span>
       {deal.fresh&&<span className="new-flag">New today</span>}
@@ -63,8 +67,8 @@ export default function Home(){
         <a href="#featured">Browse the deals <span>↓</span></a>
       </div>
       <div className="hero-collage">
-        <img src={photos.amethyst} alt="Red Heart Amethyst yarn"/>
-        <img src={photos.clearBeads} alt="Clear Bead Landing seed beads"/>
+        <img src="hero-yarn.avif" alt="Red Heart Amethyst yarn"/>
+        <img src="hero-beads.avif" alt="Clear Bead Landing seed beads"/>
         <div className="heart-stamp"><i aria-hidden="true"/><span>For Jude<br/><small>from Connor</small></span></div>
       </div>
       <Chicken/>
@@ -107,7 +111,7 @@ export default function Home(){
     {selected&&<div className="modal-backdrop" onMouseDown={()=>setSelected(null)}>
       <section className="modal" role="dialog" aria-modal="true" aria-label={`${selected.title} details`} onMouseDown={e=>e.stopPropagation()}>
         <button className="close" onClick={()=>setSelected(null)} aria-label="Close">×</button>
-        <img src={selected.image} alt={selected.title}/>
+        <img src={selected.image} alt={selected.title} onError={useSourceOnError(selected)}/>
         <div className="modal-copy">
           <div className="modal-meta"><StoreBadge store={selected.store}/><span>{selected.craft}</span></div><h2>{selected.title}</h2>
           <div className="modal-price"><strong>{money(selected.sale)}</strong><s>{money(selected.regular)}</s></div>
