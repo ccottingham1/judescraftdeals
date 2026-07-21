@@ -2,6 +2,9 @@ import { useMemo, useState } from "react";
 import { deals, meta, stores, storeLogos, type Deal, type Store } from "./data/deals";
 
 const money=(n:number)=>`$${n.toFixed(2)}`;
+// "New today" is only true on the calendar day (Central) the deal was added;
+// comparing against the verified date auto-expires the badge between audits.
+const todayCentral=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric",timeZone:"America/Chicago"});
 // If a self-hosted product image is missing, fall back to the original retailer URL.
 const useSourceOnError=(d:Deal)=>(e:React.SyntheticEvent<HTMLImageElement>)=>{
   if(d.sourceImage&&e.currentTarget.src!==d.sourceImage)e.currentTarget.src=d.sourceImage;
@@ -20,7 +23,7 @@ function Card({deal,large,saved,onToggleSave,onOpen}:{deal:Deal;large?:boolean;s
       <img src={deal.image} alt={deal.title} loading={large?"eager":"lazy"} onError={useSourceOnError(deal)}/>
       <span className="discount">{pct}% off</span>
       <span className="craft-tag">{deal.kind}</span>
-      {deal.fresh&&<span className="new-flag">New today</span>}
+      {deal.fresh&&deal.verified===todayCentral&&<span className="new-flag">New today</span>}
       <button className={`save-heart ${saved?"saved":""}`} aria-pressed={saved} aria-label={saved?"Remove from wishlist":"Save to wishlist"} onClick={e=>{e.stopPropagation();onToggleSave(deal);}}>{saved?"♥":"♡"}</button>
     </div>
     <div className="deal-info">

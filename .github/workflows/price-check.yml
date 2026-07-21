@@ -1,0 +1,41 @@
+# Twice-daily scripted price/link check (free half of the hybrid refresh).
+# Cron is UTC: 10:00/22:00 = 5 AM/5 PM Central in summer, 4 AM/4 PM in winter
+# (accepted drift). Read-only: reports problems, never edits data.
+name: Price check
+
+on:
+  schedule:
+    - cron: "0 10,22 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check prices
+        id: check
+        run: |
+          node scripts/check-prices.mjs | tee price-report.md
+          cat price-report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Open or update review issue
+        if: steps.check.outputs.problems != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          existing=$(gh issue list --label price-check --state open --json number --jq '.[0].number' || true)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file price-report.md
+          else
+            gh label create price-check --description "Automated price-check findings" --color B60205 2>/dev/null || true
+            gh issue create --title "Price check: ${{ steps.check.outputs.problems }} deal(s) need attention" \
+              --label price-check --body-file price-report.md
+          fi

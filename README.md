@@ -15,7 +15,10 @@ Originally built on ChatGPT Sites; migrated to a static Vite + React app hosted 
 | `public/store-icons/` | Self-hosted store badge icons. |
 | `scripts/validate-deals.mjs` | Build-time guard: fails on duplicate product URLs/ids or missing local images. |
 | `scripts/download-images.mjs` | Downloads deal photos into `public/products/`; `--rewrite` points the data at the local copies. |
+| `scripts/check-prices.mjs` | Deterministic price/link checker (Hobbii/Hobby Lobby/Walmart; Michaels blocks bots). Read-only, never fails the run. |
 | `.github/workflows/deploy.yml` | Builds and deploys to GitHub Pages on every push to `main`. |
+| `.github/workflows/price-check.yml` | Twice daily (10:00/22:00 UTC ≈ 5 AM/5 PM Central, 1 h earlier in winter): runs the checker, files/updates a `price-check` issue when deals drift. |
+| `.github/workflows/ai-refresh.yml` | Mon/Wed/Fri full AI audit via Claude Code: verifies all deals, prunes, hunts new ones, self-hosts images, commits, redeploys. Needs `ANTHROPIC_API_KEY` **or** `CLAUDE_CODE_OAUTH_TOKEN` repo secret. |
 
 ## Develop
 
