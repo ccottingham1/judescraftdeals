@@ -1,17 +1,16 @@
-"use client";
+// All deal data, store info, and image references for Jude's Craft Deals.
+// The refresh automation edits this file; UI code lives in src/App.tsx.
 
-import { useMemo, useState } from "react";
-
-type Craft = "Crochet" | "Beading";
-type Store = "Walmart" | "Michaels" | "Hobby Lobby" | "Hobbii";
-type LocalStore = Exclude<Store,"Hobbii">;
-type Kind = "Yarn" | "Crochet tools" | "Single-color beads" | "Bead assortments" | "Stringing" | "Beading tools" | "Craft machines";
-type Deal = {
+export type Craft = "Crochet" | "Beading";
+export type Store = "Walmart" | "Michaels" | "Hobby Lobby" | "Hobbii";
+export type LocalStore = Exclude<Store,"Hobbii">;
+export type Kind = "Yarn" | "Crochet tools" | "Single-color beads" | "Bead assortments" | "Stringing" | "Beading tools" | "Craft machines";
+export type Deal = {
   id:number; title:string; store:Store; craft:Craft; kind:Kind; regular:number; sale:number;
   image:string; url:string; detail:string; verified:string; fresh?:boolean; shipping?:string;
 };
 
-const photos = {
+export const photos = {
   clearBeads:"https://imgs.michaels.com/e8219b8a-f137-4403-adb8-1958d246299e.jpg?fit=inside|540:540",
   goldBeads:"https://imgs.michaels.com/ada3985a-b9b3-4b51-8c64-1ecbbb49221a.jpg?fit=inside|540:540",
   pliers:"https://imgs.michaels.com/c2ce5433-85d3-44c6-80d4-d1cda48b32d0.jpg?fit=inside|540:540",
@@ -60,7 +59,7 @@ const photos = {
   saffronYarn:"https://i5.walmartimages.com/seo/Red-Heart-Super-Saver-4-Medium-Acrylic-Yarn-Saffron-7oz-198g-364-Yards_93eaf2a0-6b3e-45be-a9e3-29f81e0cd708.043122b88f923bdd03ada472fdb912b3.jpeg?odnBg=FFFFFF&odnHeight=573&odnWidth=573",
 };
 
-const deals: Deal[] = [
+export const deals: Deal[] = [
   {id:1,title:"Clear Glass Seed Beads, 6/0 by Bead Landing",store:"Michaels",craft:"Beading",kind:"Single-color beads",regular:5.99,sale:2.99,image:photos.clearBeads,url:"https://www.michaels.com/product/clear-glass-seed-beads-60-by-bead-landing-10594049",detail:"Clear AB-finish glass beads · size 6/0 · 112-inch strand",verified:"July 18, 2026"},
   {id:2,title:"Light Gold Glass Seed Beads, 6/0 by Bead Landing",store:"Michaels",craft:"Beading",kind:"Single-color beads",regular:5.99,sale:4.49,image:photos.goldBeads,url:"https://www.michaels.com/product/light-gold-glass-seed-beads-60-by-bead-landing-10594047",detail:"Light-gold glass beads · size 6/0 · 100-inch strand",verified:"July 18, 2026"},
   {id:3,title:"Beadalon Nylon Jaw Flat Nose Pliers",store:"Michaels",craft:"Beading",kind:"Beading tools",regular:14.99,sale:5,image:photos.pliers,url:"https://www.michaels.com/product/beadalon-nylon-jaw-flat-nose-pliers-10157928",detail:"5.75-inch stainless-steel pliers with non-marring nylon jaws",verified:"July 18, 2026"},
@@ -109,135 +108,15 @@ const deals: Deal[] = [
   {id:46,title:"Red Heart Super Saver Yarn · Saffron",store:"Walmart",craft:"Crochet",kind:"Yarn",regular:4.99,sale:3.77,image:photos.saffronYarn,url:"https://www.walmart.com/ip/Red-Heart-Super-Saver-Medium-Acrylic-Saffron-Yarn-364-yd/844231803",detail:"7 oz · 364 yd · medium acrylic yarn · sold and shipped by Walmart",verified:"July 20, 2026",fresh:true},
 ];
 
-const stores: Record<LocalStore,{name:string,address:string,maps:string}> = {
+export const stores: Record<LocalStore,{name:string,address:string,maps:string}> = {
   Walmart:{name:"Walmart Supercenter #389",address:"1225 W I-35 Frontage, Edmond, OK 73034",maps:"https://www.google.com/maps/dir/?api=1&destination=1225+W+I-35+Frontage+Edmond+OK+73034"},
   Michaels:{name:"Michaels · Memorial Rd",address:"2201 W Memorial Rd, Oklahoma City, OK 73134",maps:"https://www.google.com/maps/dir/?api=1&destination=2201+W+Memorial+Rd+Oklahoma+City+OK+73134"},
   "Hobby Lobby":{name:"Hobby Lobby · Edmond North",address:"800 W Danforth Rd, Edmond, OK 73003",maps:"https://www.google.com/maps/dir/?api=1&destination=800+W+Danforth+Rd+Edmond+OK+73003"},
 };
 
-const money=(n:number)=>`$${n.toFixed(2)}`;
-const storeLogos:Record<Store,string>={
+export const storeLogos:Record<Store,string>={
   Walmart:"https://www.walmart.com/favicon.ico",
   Michaels:"https://www.michaels.com/favicon.ico",
   "Hobby Lobby":"https://www.hobbylobby.com/favicon.ico",
   Hobbii:"data:image/png;base64,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",
 };
-
-function StoreBadge({store}:{store:Store}){
-  return <span className={`store-badge store-${store.toLowerCase().replaceAll(" ","-")}`}>
-    <b>{store}</b><img src={storeLogos[store]} alt={`${store} logo`}/>
-  </span>
-}
-
-function Card({deal,large,onOpen}:{deal:Deal;large?:boolean;onOpen:(d:Deal)=>void}) {
-  const pct=Math.round((1-deal.sale/deal.regular)*100);
-  return <article className={`deal-card ${large?"large":""}`} onClick={()=>onOpen(deal)}>
-    <div className="deal-photo">
-      <img src={deal.image} alt={deal.title} loading={large?"eager":"lazy"}/>
-      <span className="discount">{pct}% off</span>
-      <span className="craft-tag">{deal.kind}</span>
-      {deal.fresh&&<span className="new-flag">New today</span>}
-    </div>
-    <div className="deal-info">
-      <div className="store-line"><StoreBadge store={deal.store}/><span>Online</span></div>
-      <h3>{deal.title}</h3><p>{deal.detail}</p>
-      <div className="price"><strong>{money(deal.sale)}</strong><s>{money(deal.regular)}</s><em>Save {money(deal.regular-deal.sale)}</em></div>
-      <span className="promo">Verified {deal.verified}</span>
-      <button>Deal details <span>→</span></button>
-    </div>
-  </article>
-}
-
-function Chicken(){
-  return <div className="chicken-egg" aria-label="Chicken the brown tabby cat easter egg">
-    <span className="chicken-label">Chicken <i>↘</i></span>
-    <img src="/chicken-v2.png" alt="Chicken, Jude’s brown tabby cat"/>
-  </div>
-}
-
-export default function Home(){
-  const [query,setQuery]=useState("");
-  const [craft,setCraft]=useState("All");
-  const [kind,setKind]=useState("All supplies");
-  const [store,setStore]=useState("All stores");
-  const [selected,setSelected]=useState<Deal|null>(null);
-  const featured=deals.filter(d=>(1-d.sale/d.regular)>=.33)
-    .sort((a,b)=>(1-b.sale/b.regular)-(1-a.sale/a.regular)).slice(0,9);
-  const feed=useMemo(()=>deals.filter(d=>
-    (craft==="All"||d.craft===craft)&&(kind==="All supplies"||d.kind===kind)&&(store==="All stores"||d.store===store)&&
-    `${d.title} ${d.store} ${d.kind} ${d.detail}`.toLowerCase().includes(query.toLowerCase())
-  ).sort((a,b)=>b.id-a.id),[craft,kind,store,query]);
-
-  return <main>
-    <header>
-      <a className="brand" href="#top"><span>J</span><b>Jude’s Craft Deals</b></a>
-      <nav><a href="#featured">Top deals</a><a href="#all">All deals</a><a href="#garage-sales">Garage sales</a><a href="#stores">Stores</a></nav>
-      <a className="header-search" href="#all">Search deals ⌕</a>
-    </header>
-
-    <section className="hero" id="top">
-      <div className="hero-copy">
-        <p className="eyebrow">EDMOND + ONLINE · REFRESHED JULY 20, 2026 AT 10:00 PM CENTRAL</p>
-        <h1>Craft supplies.<br/><em>Better prices.</em></h1>
-        <p>Individually checked crochet and beading offers with exact product listings and photos.</p>
-        <a href="#featured">Browse the deals <span>↓</span></a>
-      </div>
-      <div className="hero-collage">
-        <img src={photos.amethyst} alt="Red Heart Amethyst yarn"/>
-        <img src={photos.clearBeads} alt="Clear Bead Landing seed beads"/>
-        <div className="heart-stamp"><i aria-hidden="true"/><span>For Jude<br/><small>from Connor</small></span></div>
-      </div>
-      <Chicken/>
-    </section>
-
-    <section className="featured" id="featured">
-      <div className="section-title"><div><p>33% OFF OR BETTER</p><h2>Worth checking first</h2></div><span>Only the strongest verified discounts</span></div>
-      <div className="featured-grid">{featured.map((d,i)=><Card key={d.id} deal={d} large={i===0} onOpen={setSelected}/>)}</div>
-    </section>
-
-    <section className="all-deals" id="all">
-      <div className="section-title"><div><p>VERIFIED DEAL FEED</p><h2>Search everything</h2></div><span>Newest verified additions first · next audit tomorrow at 5 AM</span></div>
-      <div className="deal-tools">
-        <label className="search-box"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search yarn, seed beads, tools, store…"/></label>
-        <select value={craft} onChange={e=>setCraft(e.target.value)} aria-label="Filter by craft"><option>All</option><option>Crochet</option><option>Beading</option></select>
-        <select value={kind} onChange={e=>setKind(e.target.value)} aria-label="Filter by supply type"><option>All supplies</option><option>Yarn</option><option>Crochet tools</option><option>Single-color beads</option><option>Bead assortments</option><option>Stringing</option><option>Beading tools</option><option>Craft machines</option></select>
-        <select value={store} onChange={e=>setStore(e.target.value)} aria-label="Filter by store"><option>All stores</option><option>Walmart</option><option>Michaels</option><option>Hobby Lobby</option><option>Hobbii</option></select>
-        <b>{feed.length} results</b>
-      </div>
-      <div className="dense-grid">{feed.map(d=><Card key={d.id} deal={d} onOpen={setSelected}/>)}</div>
-      {!feed.length&&<div className="empty">No deals match that search. Try a product type or store name.</div>}
-    </section>
-
-    <section className="garage-sales" id="garage-sales">
-      <div className="section-title"><div><p>CRAFT-SUPPLY SIDE QUEST</p><h2>Garage &amp; estate sales</h2></div><span>Only active or upcoming listings</span></div>
-      <article className="garage-card">
-        <div><span className="garage-date">ACTIVE THROUGH JULY 23</span><h3>Signature Eclectic</h3><p>Multi-family online estate sale advertising crafting supplies, furniture, housewares, décor and pottery.</p></div>
-        <div><b>Oklahoma City, OK 73114</b><span>Listing checked July 19, 2026</span><a href="https://garagesalefinder.com/s/NIjoC/oklahoma-city-ok-73114" target="_blank" rel="noreferrer">Open sale advertisement ↗</a></div>
-      </article>
-      <p className="garage-note">Sale inventory changes quickly. The link goes to the original advertisement; confirm its status before driving or bidding.</p>
-    </section>
-
-    <section className="store-strip" id="stores">
-      <div><p>NEARBY STORES</p><h2>Directions from Edmond</h2><small>Check pickup availability on the product listing before driving.</small></div>
-      {Object.entries(stores).map(([key,s])=><a href={s.maps} target="_blank" rel="noreferrer" key={key}><b>{s.name}</b><span>{s.address}</span><em>Route in Maps ↗</em></a>)}
-    </section>
-
-    <footer><div className="brand"><span>J</span><b>Jude’s Craft Deals</b></div><p>Prices and stock can change. Every card links to the exact product page; confirm before ordering or driving.</p></footer>
-
-    {selected&&<div className="modal-backdrop" onMouseDown={()=>setSelected(null)}>
-      <section className="modal" role="dialog" aria-modal="true" aria-label={`${selected.title} details`} onMouseDown={e=>e.stopPropagation()}>
-        <button className="close" onClick={()=>setSelected(null)} aria-label="Close">×</button>
-        <img src={selected.image} alt={selected.title}/>
-        <div className="modal-copy">
-          <div className="modal-meta"><StoreBadge store={selected.store}/><span>{selected.craft}</span></div><h2>{selected.title}</h2>
-          <div className="modal-price"><strong>{money(selected.sale)}</strong><s>{money(selected.regular)}</s></div>
-          <p className="description">{selected.detail}. Price, comparison price, photo and listing checked {selected.verified}.</p>
-          {selected.store==="Hobbii"?
-            <div className="location"><span>ONLINE ONLY</span><b>Ships from Hobbii</b><p>{selected.shipping}. The card price does not include tax or shipping.</p></div>:
-            <div className="location"><span>ORDER / CHECK PICKUP</span><b>Exact retailer product page</b><p>Local inventory is not assumed. Select an Edmond-area store on the retailer page to confirm pickup.</p></div>}
-          <a className="retailer" href={selected.url} target="_blank" rel="noreferrer">Open Product ↗</a>
-        </div>
-      </section>
-    </div>}
-  </main>
-}
