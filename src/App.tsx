@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { deals, meta, stores, storeLogos, type Deal, type Store } from "./data/deals";
+import { deals, garageSales, meta, stores, storeLogos, type Deal, type Store } from "./data/deals";
 
 const money=(n:number)=>`$${n.toFixed(2)}`;
 // "New today" is only true on the calendar day (Central) the deal was added;
@@ -112,11 +112,13 @@ export default function Home(){
 
     <section className="garage-sales" id="garage-sales">
       <div className="section-title"><div><p>CRAFT-SUPPLY SIDE QUEST</p><h2>Garage &amp; estate sales</h2></div><span>Only active or upcoming listings</span></div>
-      <article className="garage-card">
-        <div><span className="garage-date">ACTIVE THROUGH JULY 23</span><h3>Signature Eclectic</h3><p>Multi-family online estate sale advertising crafting supplies, furniture, housewares, décor and pottery.</p></div>
-        <div><b>Oklahoma City, OK 73114</b><span>Listing checked July 19, 2026</span><a href="https://garagesalefinder.com/s/NIjoC/oklahoma-city-ok-73114" target="_blank" rel="noreferrer">Open sale advertisement ↗</a></div>
-      </article>
-      <p className="garage-note">Sale inventory changes quickly. The link goes to the original advertisement; confirm its status before driving or bidding.</p>
+      {garageSales.map(s=><article className="garage-card" key={s.id}>
+        <div><span className="garage-date">{s.status}</span><h3>{s.name}</h3><p>{s.blurb}</p></div>
+        <div><b>{s.area}</b><span>Listing checked {s.checked}</span><a href={s.url} target="_blank" rel="noreferrer">Open sale advertisement ↗</a></div>
+      </article>)}
+      {!garageSales.length&&<div className="garage-empty">No active craft-supply sales right now. New Edmond/OKC listings get added here as they appear — worth a peek after the next refresh.</div>}
+      {garageSales.length===1&&<p className="garage-note">Only one active sale right now — new Edmond/OKC listings get added as they appear.</p>}
+      {garageSales.length>0&&<p className="garage-note">Sale inventory changes quickly. The link goes to the original advertisement; confirm its status before driving or bidding.</p>}
     </section>
 
     <section className="store-strip" id="stores">

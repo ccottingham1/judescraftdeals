@@ -32,6 +32,8 @@ footer{padding:30px max(5vw,24px);display:flex;align-items:center;justify-conten
 .garage-card>div:last-child span,.garage-date{font-size:10px;letter-spacing:.08em;color:var(--muted)}
 .garage-card a{background:var(--maroon);color:white;padding:12px 15px;text-align:center;font-size:11px;font-weight:700;margin-top:auto}
 .garage-note{font-size:10px;color:var(--muted);margin:12px 0 0}
+.garage-card+.garage-card{margin-top:16px}
+.garage-empty{border:1px dashed #cbb8a5;background:#fffaf2;padding:46px 24px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6}
 @media(max-width:740px){.garage-sales{padding:60px 16px}.garage-card{grid-template-columns:1fr}.garage-card>div:last-child{border-left:0;border-top:1px solid var(--line);padding:20px 0 0}}
 @media(max-width:460px){.dense-grid{grid-template-columns:1fr}.deal-photo{height:220px}.deal-tools{grid-template-columns:1fr}.deal-tools select{height:44px}}
 .new-flag{position:absolute;left:11px;bottom:11px;background:#fff8ee;border:1px solid #ca9b68;color:var(--maroon);padding:5px 8px;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;box-shadow:2px 2px 0 rgba(125,23,23,.14)}

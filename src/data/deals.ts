@@ -138,6 +138,22 @@ export const stores: Record<LocalStore,{name:string,address:string,maps:string}>
   "Hobby Lobby":{name:"Hobby Lobby · Edmond North",address:"800 W Danforth Rd, Edmond, OK 73003",maps:"https://www.google.com/maps/dir/?api=1&destination=800+W+Danforth+Rd+Edmond+OK+73003"},
 };
 
+// Edmond/OKC garage & estate sales that explicitly advertise craft supplies.
+// The refresh automation prunes ended sales and adds new ones here; the
+// section renders a friendly empty state when this list is empty.
+export type GarageSale = {
+  id:number;
+  status:string;   // e.g. "ACTIVE THROUGH JULY 23" or "SAT–SUN, AUG 2–3"
+  name:string;
+  blurb:string;
+  area:string;
+  checked:string;  // date the advertisement was last verified
+  url:string;
+};
+export const garageSales: GarageSale[] = [
+  {id:1,status:"ACTIVE THROUGH JULY 23",name:"Signature Eclectic",blurb:"Multi-family online estate sale advertising crafting supplies, furniture, housewares, décor and pottery.",area:"Oklahoma City, OK 73114",checked:"July 19, 2026",url:"https://garagesalefinder.com/s/NIjoC/oklahoma-city-ok-73114"},
+];
+
 export const storeLogos:Record<Store,string>={
   Walmart:"store-icons/walmart.ico",
   Michaels:"store-icons/michaels.ico",

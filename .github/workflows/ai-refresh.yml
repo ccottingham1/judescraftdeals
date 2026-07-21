@@ -71,9 +71,10 @@ jobs:
                (America/Chicago). The catalog should grow or change when
                qualifying deals exist; do not merely rotate old cards.
             5. GARAGE SALES: check Edmond/OKC garage- and estate-sale listings
-               (garagesalefinder.com, estatesales.net) and update the garage
-               sale section in src/App.tsx so it only shows active or upcoming
-               sales that explicitly mention crafting supplies.
+               (garagesalefinder.com, estatesales.net) and update the
+               garageSales array in src/data/deals.ts so it only contains
+               active or upcoming sales that explicitly mention crafting
+               supplies. An empty array is fine — the UI has an empty state.
             6. Update meta.lastChecked in src/data/deals.ts to now in
                America/Chicago, formatted like "July 20, 2026 at 5:00 AM
                Central".
