@@ -41,3 +41,6 @@ next-env.d.ts
 /outputs/
 /work/
 tsconfig.tsbuildinfo
+
+# ephemeral per-run refresh output (surfaced via the review issue, not committed)
+/refresh-candidates.md

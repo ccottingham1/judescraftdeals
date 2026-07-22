@@ -1,0 +1,80 @@
+# Free, deterministic twice-daily refresh — no API keys, no per-run cost.
+# Cron is UTC: 10:00/22:00 = 5 AM/5 PM Central in summer, 4 AM/4 PM in winter
+# (accepted 1 h drift). scripts/refresh.mjs re-checks Hobbii & Hobby Lobby,
+# leaves Walmart & Michaels untouched, stamps honest per-store check dates,
+# and surfaces new-deal candidates. It never throws; the build gates every
+# commit so a bad run can't reach the live site.
+name: Refresh
+
+on:
+  schedule:
+    - cron: "0 10,22 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Run scripted refresh
+        id: refresh
+        run: node scripts/refresh.mjs
+
+      - name: Build (gate — a broken data edit must never reach the site)
+        run: npm run build
+
+      - name: Commit & push if anything changed
+        id: commit
+        if: steps.refresh.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A src/data/deals.ts REFRESH_LOG.md public/products
+          if git diff --cached --quiet; then
+            echo "nothing staged"; exit 0
+          fi
+          git commit -m "Refresh: verify deals, stamp check dates ($(date -u +%Y-%m-%d))
+
+          ${{ steps.refresh.outputs.corrected }} corrected · ${{ steps.refresh.outputs.removed }} removed · ${{ steps.refresh.outputs.flagged }} flagged. Automated by scripts/refresh.mjs."
+          git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger the free Pages deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main
+
+      - name: Open/update the review issue
+        if: always() && (steps.refresh.outputs.candidates != '0' || steps.refresh.outputs.flagged != '0' || steps.refresh.outputs.removed != '0')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create refresh --description "Automated refresh review queue" --color 1D76DB 2>/dev/null || true
+          existing=$(gh issue list --label refresh --state open --json number --jq '.[0].number' || true)
+          title="Refresh review: ${{ steps.refresh.outputs.candidates }} candidates, ${{ steps.refresh.outputs.flagged }} flagged"
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --title "$title" --body-file refresh-candidates.md
+          else
+            gh issue create --label refresh --title "$title" --body-file refresh-candidates.md
+          fi
+
+      - name: Step summary
+        if: always()
+        run: sed -n '1,40p' refresh-candidates.md >> "$GITHUB_STEP_SUMMARY" || true

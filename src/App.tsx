@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { deals, garageSales, meta, stores, storeLogos, type Deal, type Store } from "./data/deals";
+import { deals, garageSales, meta, stores, storeChecks, storeLogos, type Deal, type Store } from "./data/deals";
 
 const money=(n:number)=>`$${n.toFixed(2)}`;
 // "New today" is only true on the calendar day (Central) the deal was added;
@@ -213,6 +213,9 @@ export default function Home(){
             ?"Everyday sale price — this store runs this discount most of the time, so no rush."
             :"Genuine limited-time or clearance discount — likely gone once stock sells out."}</p>}
           <p className="description">{selected.detail}. Price, comparison price, photo and listing checked {selected.verified}.</p>
+          <p className="store-check">{storeChecks[selected.store].auto
+            ? `${selected.store} prices are auto-checked by script — last successful check ${storeChecks[selected.store].lastChecked}.`
+            : `${selected.store} can’t be auto-checked, so this price is only as current as its last manual review (${selected.verified}). Confirm on the product page before ordering.`}</p>
           {selected.store==="Hobbii"?
             <div className="location"><span>ONLINE ONLY</span><b>Ships from Hobbii</b><p>{selected.shipping}. The card price does not include tax or shipping.</p></div>:
             <div className="location"><span>ORDER / CHECK PICKUP</span><b>Exact retailer product page</b><p>Local inventory is not assumed. Select an Edmond-area store on the retailer page to confirm pickup.</p></div>}
