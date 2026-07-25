@@ -122,6 +122,16 @@ function NightSky(){
   </div>;
 }
 
+// Hidden easter-egg toy tucked in the footer. Click/tap it and Chicken bolts
+// out to chase the mouse around the screen (see the chase overlay + globals.css).
+function CatToy({onPlay}:{onPlay:()=>void}){
+  return <button type="button" className="cat-toy" onClick={onPlay}
+    aria-label="Dangle Chicken’s toy mouse" title="Psst… give it a wiggle">
+    <span className="toy-string" aria-hidden="true"/>
+    <span className="toy-mouse" aria-hidden="true">🐭</span>
+  </button>;
+}
+
 export default function Home(){
   const [query,setQuery]=useState("");
   const [craft,setCraft]=useState("All");
@@ -129,6 +139,17 @@ export default function Home(){
   const [store,setStore]=useState("All stores");
   const [avail,setAvail]=useState("All availability");
   const [selected,setSelected]=useState<Deal|null>(null);
+  const [heartSpin,setHeartSpin]=useState(false);
+  const [chasing,setChasing]=useState<""|"run"|"leaving">("");
+  const chaseTimers=useRef<number[]>([]);
+  const startChase=()=>{
+    if(chasing)return;                                   // ignore re-clicks mid-chase
+    setChasing("run");
+    chaseTimers.current.push(window.setTimeout(()=>setChasing("leaving"),7000));
+    chaseTimers.current.push(window.setTimeout(()=>setChasing(""),7600));
+  };
+  useEffect(()=>()=>{chaseTimers.current.forEach(clearTimeout)},[]);
+  const spinHeart=()=>{setHeartSpin(true);window.setTimeout(()=>setHeartSpin(false),720);}; // timer reset = replayable
   const [wishlist,setWishlist]=useState<string[]>(()=>{try{return JSON.parse(localStorage.getItem("jcd-wishlist")||"[]")}catch{return []}});
   const [wishOnly,setWishOnly]=useState(false);
   const toggleSave=(d:Deal)=>setWishlist(w=>{
@@ -147,7 +168,7 @@ export default function Home(){
     `${d.title} ${d.store} ${d.kind} ${d.detail}`.toLowerCase().includes(query.toLowerCase())
   ).sort((a,b)=>b.id-a.id),[craft,kind,store,avail,query,wishOnly,wishlist]);
 
-  return <main>
+  return <main className={chasing?"is-chasing":""}>
     <NightSky/>
     <header>
       <a className="brand" href="#top"><span>J</span><b>Jude’s Craft Deals</b></a>
@@ -168,7 +189,13 @@ export default function Home(){
       <div className="hero-collage">
         <img src="hero-yarn.avif" alt="Red Heart Amethyst yarn"/>
         <img src="hero-beads.avif" alt="Clear Bead Landing seed beads"/>
-        <div className="heart-stamp"><i aria-hidden="true"/><span>For Jude<br/><small>from Connor</small></span></div>
+        <div className="heart-stamp" role="button" tabIndex={0} aria-label="For Jude, from Connor"
+          onClick={spinHeart}
+          onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();spinHeart();}}}>
+          <div className={`heart-stamp-face${heartSpin?" spin":""}`}>
+            <i aria-hidden="true"/><span>For Jude<br/><small>from Connor</small></span>
+          </div>
+        </div>
       </div>
       <Chicken/>
     </section>
@@ -209,7 +236,12 @@ export default function Home(){
       {Object.entries(stores).map(([key,s])=><a href={s.maps} target="_blank" rel="noreferrer" key={key}><b>{s.name}</b><span>{s.address}</span><em>Route in Maps ↗</em></a>)}
     </section>
 
-    <footer><div className="brand"><span>J</span><b>Jude’s Craft Deals</b></div><p>Prices and stock can change. Every card links to the exact product page; confirm before ordering or driving.</p></footer>
+    <footer><div className="brand"><span>J</span><b>Jude’s Craft Deals</b></div><p>Prices and stock can change. Every card links to the exact product page; confirm before ordering or driving.</p><CatToy onPlay={startChase}/></footer>
+
+    {chasing&&<div className={`chase${chasing==="leaving"?" leaving":""}`} aria-hidden="true">
+      <div className="chase-mouse"><span className="toy-mouse">🐭</span></div>
+      <div className="chase-chicken"><img src="chicken-v2.png" alt=""/></div>
+    </div>}
 
     {selected&&<div className="modal-backdrop" onMouseDown={()=>setSelected(null)}>
       <section className="modal" role="dialog" aria-modal="true" aria-label={`${selected.title} details`} onMouseDown={e=>e.stopPropagation()}>
