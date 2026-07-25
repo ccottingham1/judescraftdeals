@@ -114,6 +114,14 @@ function Chicken(){
   </div>
 }
 
+// Ambient shooting stars — CSS-only, shown solely in Night mode (see globals.css),
+// pointer-events:none so they never interfere, and disabled under reduced-motion.
+function NightSky(){
+  return <div className="night-sky" aria-hidden="true">
+    {Array.from({length:6}).map((_,i)=><span className="shooting-star" key={i}><i/></span>)}
+  </div>;
+}
+
 export default function Home(){
   const [query,setQuery]=useState("");
   const [craft,setCraft]=useState("All");
@@ -140,6 +148,7 @@ export default function Home(){
   ).sort((a,b)=>b.id-a.id),[craft,kind,store,avail,query,wishOnly,wishlist]);
 
   return <main>
+    <NightSky/>
     <header>
       <a className="brand" href="#top"><span>J</span><b>Jude’s Craft Deals</b></a>
       <nav><a href="#featured">Top deals</a><a href="#all">All deals</a><a href="#garage-sales">Garage sales</a><a href="#stores">Stores</a></nav>
