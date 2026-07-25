@@ -49,6 +49,14 @@ const ACCENTS=[
   {id:"lavender",name:"Lavender",swatch:"#5d4198"},
   {id:"honey",name:"Warm honey",swatch:"#84540f"},
 ];
+// Directions for the little hearts that burst out when the coin lands — a fan
+// aimed up-and-outward, delays synced to the ~0.7s landing impact.
+const HEART_BURST=Array.from({length:7}).map((_,i)=>{
+  const a=(-152+i*22)*Math.PI/180;      // -152°..-20°, up-left through up-right
+  const d=42+(i%3)*13;
+  return {tx:`${Math.round(Math.cos(a)*d)}px`,ty:`${Math.round(Math.sin(a)*d)}px`,delay:`${(0.66+i*0.02).toFixed(3)}s`};
+});
+
 function loadTheme():ThemeChoice{
   try{
     const t=JSON.parse(localStorage.getItem("jcd-theme")||"{}");
@@ -149,7 +157,7 @@ export default function Home(){
     chaseTimers.current.push(window.setTimeout(()=>setChasing(""),7600));
   };
   useEffect(()=>()=>{chaseTimers.current.forEach(clearTimeout)},[]);
-  const spinHeart=()=>{setHeartSpin(true);window.setTimeout(()=>setHeartSpin(false),720);}; // timer reset = replayable
+  const spinHeart=()=>{setHeartSpin(true);window.setTimeout(()=>setHeartSpin(false),1350);}; // covers flip + burst; replayable
   const [wishlist,setWishlist]=useState<string[]>(()=>{try{return JSON.parse(localStorage.getItem("jcd-wishlist")||"[]")}catch{return []}});
   const [wishOnly,setWishOnly]=useState(false);
   const toggleSave=(d:Deal)=>setWishlist(w=>{
@@ -193,8 +201,12 @@ export default function Home(){
           onClick={spinHeart}
           onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();spinHeart();}}}>
           <div className={`heart-stamp-face${heartSpin?" spin":""}`}>
-            <i aria-hidden="true"/><span>For Jude<br/><small>from Connor</small></span>
+            <div className="heart-side heart-front"><i aria-hidden="true"/><span>For Jude<br/><small>from Connor</small></span></div>
+            <div className="heart-side heart-back"><i aria-hidden="true"/><span>For Jude<br/><small>from Connor</small></span></div>
           </div>
+          {heartSpin&&HEART_BURST.map((p,i)=>
+            <span key={i} className="heart-particle" aria-hidden="true"
+              style={{["--tx"]:p.tx,["--ty"]:p.ty,animationDelay:p.delay} as React.CSSProperties}>♥</span>)}
         </div>
       </div>
       <Chicken/>
