@@ -1,5 +1,12 @@
 # Refresh log
 
+## July 26, 2026 at 9:49 AM Central
+
+- **65** deals checked · 34 matched · 0 corrected · 1 removed · 0 flagged
+- Hobbii: reached, checked today · Hobby Lobby: reached, checked today · Walmart: not script-checkable · Michaels: not script-checkable
+- Removed: #47: no variants in stock
+- 20 new-deal candidate(s) surfaced (see refresh-candidates.md)
+
 ## July 26, 2026 at 2:46 AM Central
 
 - **65** deals checked · 35 matched · 0 corrected · 0 removed · 0 flagged
