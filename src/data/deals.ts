@@ -4,7 +4,7 @@
 // Written by the refresh automation after every successful audit — the ONLY
 // place the displayed freshness date lives. Never a promise about the next run.
 export const meta = {
-  lastChecked: "November 2, 2026 at 1:58 PM Central",
+  lastChecked: "November 2, 2026 at 9:17 PM Central",
 };
 
 export type Craft = "Crochet" | "Beading";
