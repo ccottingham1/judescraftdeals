@@ -1,5 +1,11 @@
 # Refresh log
 
+## November 6, 2026 at 7:36 PM Central
+
+- **43** deals checked · 13 matched · 0 corrected · 0 removed · 0 flagged
+- Hobbii: reached, checked today · Hobby Lobby: reached, checked today · Walmart: not script-checkable · Michaels: not script-checkable
+- 20 new-deal candidate(s) surfaced (see refresh-candidates.md)
+
 ## November 6, 2026 at 11:10 AM Central
 
 - **43** deals checked · 13 matched · 0 corrected · 0 removed · 0 flagged
@@ -351,12 +357,6 @@
 - 20 new-deal candidate(s) surfaced (see refresh-candidates.md)
 
 ## October 8, 2026 at 12:11 PM Central
-
-- **46** deals checked · 16 matched · 0 corrected · 0 removed · 0 flagged
-- Hobbii: reached, checked today · Hobby Lobby: reached, checked today · Walmart: not script-checkable · Michaels: not script-checkable
-- 20 new-deal candidate(s) surfaced (see refresh-candidates.md)
-
-## October 7, 2026 at 8:33 PM Central
 
 - **46** deals checked · 16 matched · 0 corrected · 0 removed · 0 flagged
 - Hobbii: reached, checked today · Hobby Lobby: reached, checked today · Walmart: not script-checkable · Michaels: not script-checkable
